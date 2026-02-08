@@ -1,48 +1,74 @@
-import { users } from '../data/users.js';
 
-export const deleteUser = (id) => {
-    console.log("Deleting user with ID:", id);
-    const userIndex = users.findIndex((u) => u.id === parseInt(id));
-    if(userIndex === -1){
-        return false;
+import { users } from "../data/users.js";
+import User from "../models/user.js"
+export const deleteUserService = (id) => {
+  const index = users.findIndex(u => u.id === id);
+
+  if (index === -1) {
+    return false;
+  }
+
+  users.splice(index, 1);
+  return true;
+};
+
+export const getUsersService = async ()=>{
+    const users = await User.find().sort({email:1});
+    return users
+}
+export const getUsersServiceisActive = async ()=>{
+  console.log("isActive in service")
+    const users = await User.find({isActive:true}).limit(5).skip(1);
+    return users
+}
+
+
+export const createUserService=async(name,email,password,role)=>{
+    console.log("processsing data in service");
+    
+  //   const newUser = {
+  //   id: Date.now().toString(),
+  //   email:email,
+  //   name:name,
+  // };
+   const newUser = await User.create({
+    name,
+    email,
+    password,
+    role
+  });
+
+  // users.push(newUser);
+  console.log("users created",newUser);
+  return newUser;
+}
+
+// let user = createUserService("aniket","ajsah2@gmail.com");
+// console.log("users detail pushing ",user);
+
+
+export const updateUserService =async(id,data)=>{
+   const updateData  = await User.findByIdAndUpdate(
+    id,
+    {$set:data},
+    {
+      new:true,
+      runValidators: true
     }
 
-    users.splice(userIndex, 1);
+   )
+   return updateData;
+}
 
-    return true;
-};
-
-export const createUser = (name, email) => {
-    console.log("Creating user with Name:", name, "Email:", email);
-    const newuser={
-        id: Date.now(),
-        name,
-        email
-    };
-    users.push(newuser);
-    return newuser;
-};
-
-export const updateUser = (id, name, email) => {
-    console.log("Updating user with ID:", id, "Name:", name, "Email:", email);
-    const user = users.find((u) => u.id === parseInt(id));
-    if(!user){
-        return null;
+export const findByEmailAndUpdate =async(email,data)=>{
+   const updateData  = await User.findOneAndUpdate(
+    {email:email},
+    {$set:data},
+    {
+      new:true,
+      runValidators: true
     }
 
-    if(name) user.name = name;
-    if(email) user.email = email;
-
-    return user;
-};
-
-export const getUserById = (id) => {
-    console.log("Getting user with ID:", id);
-    const user = users.find((u) => u.id === parseInt(id));
-    return user || null;
-};
-
-export const getAllUsers = () => {
-    console.log("Getting all users");
-    return users;
-};
+   )
+   return updateData;
+}
